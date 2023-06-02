@@ -62,6 +62,18 @@ const SignedFileUpload = () =>{
         
     }
 
+    // const handleUpload2 = ()=>{
+    //     const formData = new FormData();
+
+    //     for(let i=0; i < images.length; i++){
+    //         formData.append(`images[${i}]`,images[i])
+    //     }
+    //     fetch('https://localhost:5000/s3-signed-url',{
+    //         method:"PUT",
+    //         body:formData
+    //     }).then(res=>res.json()).then(data=>console.log('datauploaded',data)).catch(err=>console.log('error',err))
+    // }
+
     return (
         <div style={{display:'flex', justifyContent:'center',alignItems:'center', margin:'0 auto'}}>
             <div className='signup-image'>
@@ -74,7 +86,7 @@ const SignedFileUpload = () =>{
                     accept='image/png, image/jpeg, image/jpg'
                     onChange={validateImg}
                 />
-                <button className='upload-submit' onClick={handleUpload}>Submit</button>
+                <button className='upload-submit' onClick={handleUpload2}>Submit</button>
                 <div style={{width:'60%'}}>
                     {!!imagePreview.length &&  <p>Image Preview</p>}
                     <div className='images-preview'>
