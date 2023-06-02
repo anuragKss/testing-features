@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { stringify } from "qs";
+import React, { useEffect, useState } from "react";
 
 import { generatePresignedUrl, uploadFile } from "../commonFn";
 
@@ -6,6 +7,9 @@ const SignedFileUpload = () => {
   const [images, setImages] = useState([]);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [imagePreview, setImagePreview] = useState([]);
+  const [uploadedImages, setUploadedImages] = useState([]);
+
+
 
   const validateImg = (e) => {
     const files = e.target.files;
@@ -24,12 +28,15 @@ const SignedFileUpload = () => {
     setImagePreview(curratedFilesPreview);
   };
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    images.forEach(async (image) => {
-      await finalUpload(image);
-    });
-  };
+    const handleUpload = async (e) => {
+        e.preventDefault();
+        let lastData = []
+        for(let i = 0; i<images.length;i++){
+            const receivedImage = await finalUpload(images[i]);
+            lastData.push(receivedImage.data);
+        }
+        setUploadedImages(lastData)
+    };
 
   const finalUpload = async (image) => {
     const preSignedUrl = await generatePresignedUrl(
@@ -37,22 +44,10 @@ const SignedFileUpload = () => {
       image.name
     );
     console.log({ image });
-    const success = await uploadFile(preSignedUrl, image);
-    console.log({ success });
+    await uploadFile(preSignedUrl, image);
+    return await fetch(`https://localhost:5000/s3-signed-url/${image.lastModified}&objectKey=${image.name}`).then(res=>res.json())
+    .then(res=>res)    
   };
-
-      // const handleUpload2 = ()=>{
-    //     const formData = new FormData();
-
-    //     for(let i=0; i < images.length; i++){
-    //         formData.append(`images[${i}]`,images[i])
-    //     }
-    //     fetch('https://localhost:5000/s3-signed-url',{
-    //         method:"PUT",
-    //         body:formData
-    //     }).then(res=>res.json()).then(data=>console.log('datauploaded',data)).catch(err=>console.log('error',err))
-    // }
-
   return (
     <div
       style={{
@@ -81,8 +76,17 @@ const SignedFileUpload = () => {
           {!!imagePreview.length && <p>Image Preview</p>}
           <div className="images-preview">
             {!!imagePreview.length &&
-              imagePreview.map((image, index) => {
-                return <img src={image} key={index}/>;
+              imagePreview.map((image) => {
+                return <img src={image} />;
+              })}
+          </div>
+        </div>
+        <div style={{ width: "60%" }}>
+          {!!uploadedImages.length && <p>Uploaded Images</p>}
+          <div className="images-preview">
+            {!!uploadedImages.length &&
+              uploadedImages.map((image) => {
+                return <img src={image} />;
               })}
           </div>
         </div>
