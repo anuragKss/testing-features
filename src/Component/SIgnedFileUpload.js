@@ -1,7 +1,6 @@
-import { stringify } from "qs";
 import React, { useEffect, useState } from "react";
 
-import { generatePresignedUrl, uploadFile } from "../commonFn";
+import { finalUpload } from "../utils";
 
 const SignedFileUpload = () => {
   const [images, setImages] = useState([]);
@@ -9,13 +8,11 @@ const SignedFileUpload = () => {
   const [imagePreview, setImagePreview] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
 
-
-
   const validateImg = (e) => {
     const files = e.target.files;
     let curratedFiles = [];
     let curratedFilesPreview = [];
-    console.log("files", Object.values(files));
+    // console.log("files", Object.values(files));
     Object.values(files)?.forEach((file) => {
       if (file?.size >= 1048576) {
         return alert("Max File size is 1mb");
@@ -28,26 +25,16 @@ const SignedFileUpload = () => {
     setImagePreview(curratedFilesPreview);
   };
 
-    const handleUpload = async (e) => {
-        e.preventDefault();
-        let lastData = []
-        for(let i = 0; i<images.length;i++){
-            const receivedImage = await finalUpload(images[i]);
-            lastData.push(receivedImage.data);
-        }
-        setUploadedImages(lastData)
-    };
-
-  const finalUpload = async (image) => {
-    const preSignedUrl = await generatePresignedUrl(
-      image.lastModified,
-      image.name
-    );
-    console.log({ image });
-    await uploadFile(preSignedUrl, image);
-    return await fetch(`https://localhost:5000/s3-signed-url/${image.lastModified}&objectKey=${image.name}`).then(res=>res.json())
-    .then(res=>res)    
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    let lastData = [];
+    for (let i = 0; i < images.length; i++) {
+      const receivedImage = await finalUpload(images[i]);
+      lastData.push(receivedImage.data);
+    }
+    setUploadedImages(lastData);
   };
+
   return (
     <div
       style={{
@@ -86,7 +73,8 @@ const SignedFileUpload = () => {
           <div className="images-preview">
             {!!uploadedImages.length &&
               uploadedImages.map((image) => {
-                return <img src={image} />;
+                // console.log({ image });
+                return <img src={image} alt="" />;
               })}
           </div>
         </div>
