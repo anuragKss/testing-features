@@ -1,7 +1,10 @@
 import axios from "axios";
+import { createIdKey } from "./idKey";
+
+const configAPI = `https://localhost:5000`;
 
 export const getPutPresignedUrl = (id, objectKey) => {
-  const url = `https://localhost:5000/s3-signed-url/${id}`;
+  const url = `${configAPI}/s3-signed-url/${id}`;
   return axios.put(url, { objectKey }).then((res) => res);
 };
 
@@ -9,14 +12,10 @@ export const generatePresignedUrl = async (id, objectKey) => {
   const {
     data: { data: preSignedUrl },
   } = await getPutPresignedUrl(id, objectKey);
-  //   console.log({ data });
   return preSignedUrl;
 };
 
 export const uploadFile = async (preSignedUrl, singleFile) => {
-  // console.log({ preSignedUrl });
-  // console.log({ singleFile });
-
   try {
     const response = await fetch(preSignedUrl, {
       method: "PUT",
@@ -32,7 +31,7 @@ export const uploadFile = async (preSignedUrl, singleFile) => {
 
 export const getPresignedUrl = async (id, objectKey) => {
   return await fetch(
-    `https://localhost:5000/s3-signed-url/${id}?objectKey=${objectKey}`,
+    `${configAPI}/s3-signed-url/${id}?objectKey=${objectKey}`,
     {
       method: "GET",
     }
@@ -42,14 +41,13 @@ export const getPresignedUrl = async (id, objectKey) => {
 };
 
 export const finalUpload = async (image) => {
-  const preSignedUrl = await generatePresignedUrl(
-    image.lastModified,
-    image.name
-  );
+  const {
+    data: {
+      data: { id, objectKey },
+    },
+  } = await createIdKey(image.name);
+  const preSignedUrl = await generatePresignedUrl(id, objectKey);
   await uploadFile(preSignedUrl, image);
-  // console.log({ image });
-  // console.log({ lastModified: image });
-  const URL = await getPresignedUrl(image.lastModified, image.name);
-  // console.log({ URL });
+  const URL = await getPresignedUrl(id, objectKey);
   return URL;
 };

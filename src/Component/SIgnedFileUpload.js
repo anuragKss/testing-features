@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { finalUpload } from "../utils";
+import { finalUpload } from "../__services/commonAPIs";
 
 const SignedFileUpload = () => {
   const [images, setImages] = useState([]);
@@ -12,7 +12,6 @@ const SignedFileUpload = () => {
     const files = e.target.files;
     let curratedFiles = [];
     let curratedFilesPreview = [];
-    // console.log("files", Object.values(files));
     Object.values(files)?.forEach((file) => {
       if (file?.size >= 1048576) {
         return alert("Max File size is 1mb");
@@ -73,7 +72,6 @@ const SignedFileUpload = () => {
           <div className="images-preview">
             {!!uploadedImages.length &&
               uploadedImages.map((image) => {
-                // console.log({ image });
                 return <img src={image} alt="" />;
               })}
           </div>
